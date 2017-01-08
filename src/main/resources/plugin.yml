@@ -1,0 +1,14 @@
+name: ScLoad
+main: me.fromgate.scload.ScLoad
+version: 0.1.4
+depend: [WorldEdit]
+author: fromgate, fromgate@gmail.com
+commands:
+   scload:
+      aliases: [scl]
+      description: ScLoad command
+      usage: |
+           /scload load <filename> 
+           /scload load <filename> <world>
+           /scload reload
+           /scload cfg
