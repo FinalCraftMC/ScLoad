@@ -1,4 +1,4 @@
-/*  
+/*
  *  ScLoad, Minecraft bukkit plugin
  *  (c)2013-2017, fromgate, fromgate@gmail.com
  *  http://dev.bukkit.org/server-mods/schematic/
@@ -158,7 +158,7 @@ public class SLUtil extends FGUtilCore implements CommandExecutor, Listener {
         addMSG("msg_senderisnotplayer", "You need to specify the world and coordinates or run this command as a logged player");
         addMSG("msg_reloaded", "Configuration reloaded");
         addMSG("msg_filelist", "File list (extension not shown)");
-        addMSG("cfgmsg_schematic-loader_use-worldedit-folder", "Use WorldEdit forlder: %1%");
+        addMSG("cfgmsg_schematic-loader_use-worldedit-folder", "Use WorldEdit folder: %1%");
         addMSG("cfgmsg_schematic-loader_blocks-per-tick", "Number of blocks to place during the single tick: %1%");
         addMSG("cfgmsg_schematic-loader_delay-between-ticks", "Delay between ticks (min = 1): %1%");
         addMSG("cfgmsg_schematic-loader_fast-place", "Place blocks fast (without physics): %1%");

@@ -24,12 +24,13 @@
 package me.fromgate.scload;
 
 import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.schematic.SchematicFormat;
+import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -38,6 +39,7 @@ import org.bukkit.entity.Entity;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.io.FileInputStream;
 import java.util.*;
 
 @SuppressWarnings("ALL")
@@ -85,73 +87,75 @@ public class SLQueue {
 
     public void start() {
         active = true;
-        CuboidClipboard cc = load(filename);
-        if (cc == null) return;
-        fillEntities(cc);
-        addAndStart(cc);
+        BlockArrayClipboard bac = load(filename);
+        if (bac == null) {
+            plg().u.log("File not found.");
+            // The optimal thing to do here is to be able to get the sender who
+            // requested the queue so that we could send the message directly
+            // to them in the Minecraft server that the file could not be found.
+            return;
+        }
+        fillEntities(bac);
+        addAndStart(bac);
     }
 
-    public CuboidClipboard load(String filename) {
+    public BlockArrayClipboard load(String filename) {
         if (filename.isEmpty()) return null;
-        File f = new File(plg().schem_dir + File.separator + filename + ".schematic");
-        if (!f.exists()) return null;
+        File f = null;
+        if (Bukkit.getPluginManager().getPlugin("FastAsyncWorldEdit") == null)
+            f = new File(plg().schem_dir + File.separator + filename + ".schematic");
+        else
+            // FAWE puts schematics into subfolders with labeled player UUIDs,
+            // unlike WE where the schematics folder has no subfolders.
+            for (File file : new File(plg().schem_dir).listFiles())
+                for (File schematic : file.listFiles())
+                    if (schematic.getName().equals(filename + ".schematic")) {
+                        f = schematic;
+                        break;
+                    }
+        if (f == null || !f.exists()) return null;
         SchematicFormat sc = SchematicFormat.getFormat(f);
         if (sc == null) return null;
-        CuboidClipboard cc = null;
+        BlockArrayClipboard bac = null;
         try {
-            cc = sc.load(f);
+            bac = (BlockArrayClipboard) ClipboardFormat.SCHEMATIC.getReader(new FileInputStream(f)).read(worldeditworld.getWorldData());
         } catch (Exception e) {
             plg().u.log("Error loading file " + f.getAbsolutePath());
             e.printStackTrace();
-            return null;
         }
-        return cc;
+        return bac;
     }
 
-    public void addAndStart(final CuboidClipboard cc) {
+    public void addAndStart(final BlockArrayClipboard bac) {
         Bukkit.getScheduler().runTaskLaterAsynchronously(plg(), new Runnable() {
             @Override
             public void run() {
-                addDelayed(pos, cc);
+                addDelayed(pos, bac);
                 processQueue();
             }
         }, plg().delay);
     }
 
-    public BaseBlock[][][] getCuboidClipboadData(CuboidClipboard cc) {
-        try {
-            Object obj = cc;
-            Field f;
-            f = obj.getClass().getDeclaredField("data");
-            f.setAccessible(true);
-            BaseBlock[][][] blocks = (BaseBlock[][][]) f.get(obj);
-            return blocks;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public void fillEntities(CuboidClipboard cc) { //World w, Vector pos, CuboidClipboard cc
+    public void fillEntities(BlockArrayClipboard bac) { //World w, Vector pos, BlockArrayClipboard bac
+        Vector dim = bac.getDimensions();
         Location loc1 = new Location(world, pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
-        Location loc2 = new Location(world, pos.getBlockX() + cc.getSize().getBlockX(), pos.getBlockY() + cc.getSize().getBlockY(), pos.getBlockZ() + cc.getSize().getBlockZ());
+        Location loc2 = new Location(world, pos.getBlockX() + dim.getBlockX(), pos.getBlockY() + dim.getBlockY(), pos.getBlockZ() + dim.getBlockZ());
         entities = plg().u.getEntities(loc1, loc2);
     }
 
-    public void addDelayed(Vector pos, CuboidClipboard cc) {
+    public void addDelayed(Vector pos, BlockArrayClipboard bac) {
         queue = new ArrayList<List<VBlock>>();
         chunked = new HashMap<VChunk, List<VBlock>>();
         List<VBlock> first = new ArrayList<VBlock>();
         List<VBlock> last = new ArrayList<VBlock>();
         List<VBlock> fin = new ArrayList<VBlock>();
-        BaseBlock[][][] blocks = getCuboidClipboadData(cc);
-
-        for (int x = 0; x < cc.getSize().getBlockX(); x++)
-            for (int y = 0; y < cc.getSize().getBlockY(); y++)
-                for (int z = 0; z < cc.getSize().getBlockZ(); z++) {
+        Vector dimensions = bac.getDimensions();
+        for (int x = 0; x < dimensions.getBlockX(); x++)
+            for (int y = 0; y < dimensions.getBlockY(); y++)
+                for (int z = 0; z < dimensions.getBlockZ(); z++) {
                     if (pos.getBlockY() + y < 0) continue;
                     if (pos.getBlockY() + y >= world.getMaxHeight()) continue;
-                    BaseBlock bb = blocks[x][y][z];
+                    BaseBlock bb = bac.getBlock(new Vector(x, y, z).add(bac.getMinimumPoint(op)));
                     BlockVector bv = pos.add(x, y, z).toBlockVector();
                     VChunk vch = new VChunk(bv);
                     VBlock vb = new VBlock(world, bv, bb);

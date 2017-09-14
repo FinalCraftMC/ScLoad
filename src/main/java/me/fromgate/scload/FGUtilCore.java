@@ -1,10 +1,10 @@
-/*  
+/*
  *  ScLoad, Minecraft bukkit plugin
  *  (c)2012-2017, fromgate, fromgate@gmail.com
  *  http://dev.bukkit.org/server-mods/reactions/
- *    
+ *
  *  This file is part of ScLoad.
- *  
+ *
  *  ReActions is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with ScLoad.  If not, see <http://www.gnorg/licenses/>.
- * 
+ *
  */
 
 
@@ -60,7 +60,7 @@ public abstract class FGUtilCore {
     private String permprefix = "fgutilcore.";
     private String language = "english";
     private String plgcmd = "<command>";
-    // Сообщения+перевод
+    //Сообщения+перевод
     YamlConfiguration lng;
     private boolean savelng = false;
     //String lngfile = this.language+".lng";
@@ -191,7 +191,7 @@ public abstract class FGUtilCore {
     }
 
 
-    /* 
+    /*
      * Инициализация стандартных сообщений
      */
     private void initStdMsg() {
@@ -208,6 +208,7 @@ public abstract class FGUtilCore {
         addMSG("hlp_cmdparam_parameter", "parameter");
         addMSG("cmd_unknown", "Unknown command: %1%");
         addMSG("cmd_cmdpermerr", "Something wrong (check command, permissions)");
+        // addMSG("cmd_ccnull", "The file could not be found.");
         addMSG("enabled", "enabled");
         msg.put("enabled", ChatColor.DARK_GREEN + msg.get("enabled"));
         addMSG("disabled", "disabled");
@@ -257,7 +258,7 @@ public abstract class FGUtilCore {
         else cmdlist = cmdlist + ", " + cmd;
     }
 
-    /* 
+    /*
      * Проверка пермишенов и наличия команды
      */
 
@@ -370,8 +371,8 @@ public abstract class FGUtilCore {
 
 
     /*
-     * Разные полезные процедурки 
-     * 
+     * Разные полезные процедурки
+     *
      */
 
     /* Функция проверяет входит ли число (int)
@@ -387,7 +388,7 @@ public abstract class FGUtilCore {
         return false;
     }
 
-    /* 
+    /*
      * Функция проверяет входят ли все числа массива (int)
      * в список чисел представленных в виде строки вида n1,n2,n3,...nN
      */
@@ -398,7 +399,7 @@ public abstract class FGUtilCore {
     }
 
 
-    /* 
+    /*
      * Функция проверяет входит ли слово (String) в список слов
      * представленных в виде строки вида n1,n2,n3,...nN
      */
@@ -410,7 +411,7 @@ public abstract class FGUtilCore {
         return false;
     }
 
-    /* 
+    /*
      * Функция проверяет входит есть ли item (блок) с заданным id и data в списке,
      * представленным в виде строки вида id1:data1,id2:data2,MATERIAL_NAME:data
      * При этом если data может быть опущена
@@ -641,7 +642,7 @@ public abstract class FGUtilCore {
     }
 
     /*
-     * Вывод сообщения пользователю 
+     * Вывод сообщения пользователю
      */
     public void printMsg(CommandSender p, String msg) {
         String message = ChatColor.translateAlternateColorCodes('&', msg);
@@ -658,7 +659,7 @@ public abstract class FGUtilCore {
 
 
     /*
-     * Бродкаст сообщения, использую при отладке 
+     * Бродкаст сообщения, использую при отладке
      */
     public void BC(String msg) {
         plg.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', px + msg));
@@ -676,14 +677,14 @@ public abstract class FGUtilCore {
 
     /*
      * 	public void printMSG (CommandSender p, Object... s){
-		String message = getMSG (s); 
+		String message = getMSG (s);
 		if ((!(p instanceof Player))&&(!colorconsole)) message = ChatColor.stripColor(message);
 		p.sendMessage(message);
 	}
      */
 
     /*
-     * Запись сообщения в лог 
+     * Запись сообщения в лог
      */
     public void log(String msg) {
         log.info(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', px + msg)));
@@ -697,7 +698,7 @@ public abstract class FGUtilCore {
 
 
     /*
-     * Отправка цветного сообщения в консоль 
+     * Отправка цветного сообщения в консоль
      */
     public void SC(String msg) {
         plg.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', px + msg));
@@ -707,7 +708,7 @@ public abstract class FGUtilCore {
 
     /*
      * Перевод
-     * 
+     *
      */
 
     /*
@@ -716,12 +717,9 @@ public abstract class FGUtilCore {
     public void InitMsgFile() {
         try {
             lng = new YamlConfiguration();
-            File f = new File(plg.getDataFolder() + File.separator + this.language + ".lng");
-            if (f.exists()) lng.load(f);
-            else {
-                InputStream is = plg.getClass().getResourceAsStream("/language/" + this.language + ".lng");
-                if (is != null) lng.load(is);
-            }
+            File f = new File(plg.getDataFolder() + File.separator + "language" + File.separator + this.language + ".lng");
+            if (!f.exists()) plg.saveResource("language/" + this.language + ".lng", false);
+            lng.load(f);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -749,7 +747,7 @@ public abstract class FGUtilCore {
 
 
     /*
-     * Сохранение сообщений в файл 
+     * Сохранение сообщений в файл
      */
     public void SaveMSG() {
         String[] keys = this.msglist.split(",");
@@ -810,7 +808,7 @@ public abstract class FGUtilCore {
         p.sendMessage(message);
     }
 
-    /* 
+    /*
      * Печать справки
      */
     public void PrintHLP(Player p) {
@@ -822,7 +820,7 @@ public abstract class FGUtilCore {
     }
 
 
-    /* 
+    /*
      * Печать справки по команде
      */
     public void printHLP(Player p, String cmd) {
@@ -848,7 +846,7 @@ public abstract class FGUtilCore {
         printPage(p, hlp, page, title, "", false, lpp);
     }
 
-    /* 
+    /*
      * Возврат логической переменной в виде текста выкл./вкл.
      */
     public String EnDis(boolean b) {
@@ -860,20 +858,20 @@ public abstract class FGUtilCore {
         return b ? ChatColor.DARK_GREEN + str2 : ChatColor.RED + str2;
     }
 
-    /* 
-     * Печать значения логической переменной 
+    /*
+     * Печать значения логической переменной
      */
     public void printEnDis(CommandSender p, String msg_id, boolean b) {
         p.sendMessage(getMSG(msg_id) + ": " + EnDis(b));
     }
 
 
-    /* 
+    /*
      * Дополнительные процедуры
      */
 
     /*
-     * Переопределение префикса пермишенов 
+     * Переопределение префикса пермишенов
      */
     public void setPermPrefix(String ppfx) {
         this.permprefix = ppfx + ".";
@@ -882,7 +880,7 @@ public abstract class FGUtilCore {
 
     /*
      * Проверка соответствия пермишена (указывать без префикса)
-     * заданной команде 
+     * заданной команде
      */
     public boolean equalCmdPerm(String cmd, String perm) {
         return (cmds.containsKey(cmd.toLowerCase())) &&
@@ -891,7 +889,7 @@ public abstract class FGUtilCore {
 
 
 
-    /* 
+    /*
      * Преобразует строку вида <id>:<data>[*<amount>] в ItemStack
      * Возвращает null если строка кривая
      */
@@ -992,14 +990,14 @@ public abstract class FGUtilCore {
             //int id = -1;
             Material m = Material.AIR;
             int amount =1;
-            short data =0;			
+            short data =0;
             String [] si = itemstr.split("\\*");
             if (si.length>0){
                 if ((si.length==2)&&si[1].matches("[1-9]+[0-9]*")) amount = Integer.parseInt(si[1]);
                 String ti[] = si[0].split(":");
                 if (ti.length>0){
                     if (ti[0].matches("[0-9]*")) m = Material.getMaterial(Integer.parseInt(ti[0]));//id=Integer.parseInt(ti[0]);
-                    else m=Material.getMaterial(ti[0].toUpperCase());						
+                    else m=Material.getMaterial(ti[0].toUpperCase());
                     if ((ti.length==2)&&(ti[1]).matches("[0-9]*")) data = Short.parseShort(ti[1]);
                     return new ItemStack (m,amount,data);
                 }
@@ -1061,7 +1059,7 @@ public abstract class FGUtilCore {
 
 
     /*
-     * Проверка формата строкового представления целых чисел 
+     * Проверка формата строкового представления целых чисел
      */
     public boolean isIntegerSigned(String str) {
         return (str.matches("-?[0-9]+[0-9]*"));
@@ -1188,5 +1186,3 @@ public abstract class FGUtilCore {
 
 
 }
-
-
