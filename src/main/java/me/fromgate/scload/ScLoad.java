@@ -1,10 +1,10 @@
-/*  
+/*
  *  ScLoad, Minecraft bukkit plugin
  *  (c)2013-2017, fromgate, fromgate@gmail.com
  *  http://dev.bukkit.org/server-mods/schematic/
- *    
+ *
  *  This file is part of ScLoad.
- *  
+ *
  *  ScLoad is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with ScLoad.  If not, see <http://www.gnorg/licenses/>.
- * 
+ *
  */
 
 package me.fromgate.scload;
@@ -54,11 +54,11 @@ public class ScLoad extends JavaPlugin {
         schem_dir = getSchematicDirectory();
         instance = this;
 
-        try {
+        /* try {
             MetricsLite metrics = new MetricsLite(this);
             metrics.start();
         } catch (IOException e) {
-        }
+        } */
     }
 
     public void reloadCfg() {

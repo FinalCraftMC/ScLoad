@@ -47,7 +47,7 @@ public class QueueManager {
 
     public static boolean addQueue(CommandSender s, World w, Vector v, String fn) {
         if (qman.containsKey(s.getName()) && qman.get(s.getName()).isActive()) return false;
-        qman.put(s.getName(), new SLQueue(w, v, fn));
+        qman.put(s.getName(), new SLQueue(s, w, v, fn));
         startNext();
         return true;
     }
@@ -74,4 +74,3 @@ public class QueueManager {
 
 
 }
-
