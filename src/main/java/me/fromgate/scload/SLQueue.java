@@ -28,20 +28,23 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.schematic.SchematicFormat;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import org.bukkit.command.CommandSender;
+import com.sk89q.worldedit.schematic.SchematicFormat;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.io.FileInputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("ALL")
 public class SLQueue {
@@ -155,7 +158,7 @@ public class SLQueue {
                 for (int z = 0; z < dimensions.getBlockZ(); z++) {
                     if (pos.getBlockY() + y < 0) continue;
                     if (pos.getBlockY() + y >= world.getMaxHeight()) continue;
-                    BaseBlock bb = bac.getBlock(new Vector(x, y, z).add(bac.getMinimumPoint(op)));
+                    BaseBlock bb = bac.getBlock(new Vector(x, y, z).add(bac.getMinimumPoint()));
                     BlockVector bv = pos.add(x, y, z).toBlockVector();
                     VChunk vch = new VChunk(bv);
                     VBlock vb = new VBlock(world, bv, bb);
