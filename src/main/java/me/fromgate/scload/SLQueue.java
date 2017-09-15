@@ -31,6 +31,7 @@ import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.schematic.SchematicFormat;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
+import org.bukkit.command.CommandSender;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -53,6 +54,7 @@ public class SLQueue {
 
     World world;
     BukkitWorld worldeditworld;
+    CommandSender sender;
     Vector pos;
     String filename;
 
@@ -70,7 +72,8 @@ public class SLQueue {
     }
 
 
-    SLQueue(World w, Vector pos, String filename) {
+    SLQueue(CommandSender s, World w, Vector pos, String filename) {
+        this.sender = s;
         this.world = w;
         this.pos = pos;
         this.filename = filename;
@@ -89,10 +92,7 @@ public class SLQueue {
         active = true;
         BlockArrayClipboard bac = load(filename);
         if (bac == null) {
-            plg().u.log("File not found.");
-            // The optimal thing to do here is to be able to get the sender who
-            // requested the queue so that we could send the message directly
-            // to them in the Minecraft server that the file could not be found.
+            sender.sendMessage("Schematic file not found.");
             return;
         }
         fillEntities(bac);
