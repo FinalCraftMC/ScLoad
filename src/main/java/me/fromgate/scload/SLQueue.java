@@ -35,11 +35,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,9 +57,9 @@ public class SLQueue {
 
     World world;
     BukkitWorld worldeditworld;
-    CommandSender sender;
     Vector pos;
-    String filename;
+    BlockArrayClipboard bac;
+
 
     Map<VChunk, List<VBlock>> chunked;
     List<List<VBlock>> queue;
@@ -74,12 +74,13 @@ public class SLQueue {
         return flag_loaded;
     }
 
-
-    SLQueue(CommandSender s, World w, Vector pos, String filename) {
-        this.sender = s;
+    SLQueue(World w, Vector pos, String filename) throws FileNotFoundException {
         this.world = w;
         this.pos = pos;
-        this.filename = filename;
+        bac = load(filename);
+        if (bac == null) {
+            throw new FileNotFoundException("Schematic file not found.");
+        }
         this.worldeditworld = new BukkitWorld(w);
     }
 
@@ -93,29 +94,27 @@ public class SLQueue {
 
     public void start() {
         active = true;
-        BlockArrayClipboard bac = load(filename);
-        if (bac == null) {
-            sender.sendMessage("Schematic file not found.");
-            return;
-        }
-        fillEntities(bac);
+        fillEntities();
         addAndStart(bac);
     }
 
     public BlockArrayClipboard load(String filename) {
         if (filename.isEmpty()) return null;
         File f = null;
-        if (Bukkit.getPluginManager().getPlugin("FastAsyncWorldEdit") == null)
+        if (Bukkit.getPluginManager().getPlugin("FastAsyncWorldEdit") == null) {
             f = new File(plg().schem_dir + File.separator + filename + ".schematic");
+        }
         else
             // FAWE puts schematics into subfolders with labeled player UUIDs,
             // unlike WE where the schematics folder has no subfolders.
-            for (File file : new File(plg().schem_dir).listFiles())
-                for (File schematic : file.listFiles())
+            for (File file : new File(plg().schem_dir).listFiles()) {
+                for (File schematic : file.listFiles()) {
                     if (schematic.getName().equals(filename + ".schematic")) {
                         f = schematic;
                         break;
                     }
+                }
+            }
         if (f == null || !f.exists()) return null;
         SchematicFormat sc = SchematicFormat.getFormat(f);
         if (sc == null) return null;
@@ -139,7 +138,7 @@ public class SLQueue {
         }, plg().delay);
     }
 
-    public void fillEntities(BlockArrayClipboard bac) { //World w, Vector pos, BlockArrayClipboard bac
+    public void fillEntities() {
         Vector dim = bac.getDimensions();
         Location loc1 = new Location(world, pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
         Location loc2 = new Location(world, pos.getBlockX() + dim.getBlockX(), pos.getBlockY() + dim.getBlockY(), pos.getBlockZ() + dim.getBlockZ());

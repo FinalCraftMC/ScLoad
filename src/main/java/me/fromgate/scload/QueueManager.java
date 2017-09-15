@@ -24,30 +24,36 @@
 package me.fromgate.scload;
 
 import com.sk89q.worldedit.Vector;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class QueueManager {
-    static ScLoad plg() {
-        return ScLoad.instance;
+
+    private static Map<String, SLQueue> qman = new HashMap<>();
+
+    public static boolean addQueue(Player player, String fileName) {
+        if (qman.containsKey(player.getName()) && qman.get(player.getName()).isActive()) return false;
+        return addQueue (player, player.getWorld(),
+                new Vector(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ()),
+                fileName);
     }
 
-    private static Map<String, SLQueue> qman = new HashMap<String, SLQueue>();
-
-    public static boolean addQueue(Player p, String fname) {
-        if (qman.containsKey(p.getName()) && qman.get(p.getName()).isActive()) return false;
-        qman.put(p.getName(), new SLQueue(p.getWorld(), new Vector(p.getLocation().getBlockX(), p.getLocation().getBlockY(), p.getLocation().getBlockZ()), fname));
-        startNext();
-        return true;
-    }
-
-    public static boolean addQueue(CommandSender s, World w, Vector v, String fn) {
-        if (qman.containsKey(s.getName()) && qman.get(s.getName()).isActive()) return false;
-        qman.put(s.getName(), new SLQueue(s, w, v, fn));
+    public static boolean addQueue(CommandSender sender, World world, Vector vector, String fileName) {
+        if (qman.containsKey(sender.getName()) && qman.get(sender.getName()).isActive()) return false;
+        SLQueue slQueue = null;
+        try {
+            slQueue = new SLQueue(world, vector, fileName);
+        } catch (FileNotFoundException e) {
+            sender.sendMessage(ChatColor.RED + "Schematic file not found.");
+            return false;
+        }
+        qman.put(sender.getName(), slQueue);
         startNext();
         return true;
     }
