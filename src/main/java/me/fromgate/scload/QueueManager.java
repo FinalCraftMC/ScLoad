@@ -23,7 +23,8 @@
 
 package me.fromgate.scload;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
+
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -40,15 +41,15 @@ public class QueueManager {
     public static boolean addQueue(Player player, String fileName) {
         if (qman.containsKey(player.getName()) && qman.get(player.getName()).isActive()) return false;
         return addQueue (player, player.getWorld(),
-                new Vector(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ()),
+                BlockVector3.at(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ()),
                 fileName);
     }
 
-    public static boolean addQueue(CommandSender sender, World world, Vector vector, String fileName) {
+    public static boolean addQueue(CommandSender sender, World world, BlockVector3 v, String fileName) {
         if (qman.containsKey(sender.getName()) && qman.get(sender.getName()).isActive()) return false;
         SLQueue slQueue = null;
         try {
-            slQueue = new SLQueue(world, vector, fileName);
+            slQueue = new SLQueue(world, v, fileName);
         } catch (FileNotFoundException e) {
             sender.sendMessage(ChatColor.RED + "Schematic file not found.");
             return false;

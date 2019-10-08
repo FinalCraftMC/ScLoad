@@ -23,7 +23,8 @@
 
 package me.fromgate.scload;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -32,10 +33,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,18 +44,12 @@ public class SLUtil extends FGUtilCore implements CommandExecutor, Listener {
 
     public SLUtil(ScLoad plugin, boolean vcheck, boolean savelng, String language) {
         super(plugin, savelng, language, "scload", "schematic");
-        this.initUpdateChecker("ScLoad", "60814", "schematic", vcheck);
         this.plg = plugin;
         fillMSG();
         if (savelng) this.SaveMSG();
         initCommands();
     }
-
-    @EventHandler(priority = EventPriority.NORMAL)
-    public void onJoin(PlayerJoinEvent event) {
-        updateMsg(event.getPlayer());
-    }
-
+    
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String cmdLabel, String[] args) {
         if ((args.length > 0) && checkCmdPerm(sender, args[0])) {
@@ -87,7 +79,7 @@ public class SLUtil extends FGUtilCore implements CommandExecutor, Listener {
             int x = Integer.parseInt(xs);
             int y = Integer.parseInt(ys);
             int z = Integer.parseInt(zs);
-            Vector v = new Vector(x, y, z);
+            BlockVector3 v = BlockVector3.at(x, y, z);
             QueueManager.addQueue(sender, w, v, fn);
             printMSG(sender, "msg_loadstarted", new Location(w, x, y, z), fn);
         } else return false;

@@ -23,28 +23,35 @@
 
 package me.fromgate.scload;
 
-import com.sk89q.worldedit.BlockVector;
+import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockType;
+
 import org.bukkit.World;
 
 public class VBlock {
     BukkitWorld world;
-    BlockVector bvector;
-    BaseBlock bblock;
+    BlockVector3 bvector;
+    BlockState bblock;
+    BaseBlock block;
     int hash;
 
-    public VBlock(World w, BlockVector bv, BaseBlock bb) {
+    public VBlock(World w, BlockVector3 bv, BlockState bb, CompoundTag nbt) {
         this.world = new BukkitWorld(w);
         this.bvector = bv;
+        block = bb.toBaseBlock();
+        block.setNbtData(nbt);
         this.bblock = bb;
         this.hash = calcHashCode();
     }
 
     public void placeBlockFast() {
         try {
-            world.setBlock(bvector, bblock, false);
+            world.setBlock(bvector, block, false);
         } catch (WorldEditException e) {
             e.printStackTrace();
         }
@@ -53,14 +60,14 @@ public class VBlock {
     public void placeBlock() {
 
         try {
-            world.setBlock(bvector, bblock, true);
+            world.setBlock(bvector, block, true);
         } catch (WorldEditException e) {
             e.printStackTrace();
         }
     }
 
-    public int getTypeId() {
-        return bblock.getType();
+    public BlockType getTypeId() {
+        return bblock.getBlockType();
     }
 
 

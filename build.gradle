@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+    id 'eclipse'
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+}
+
+dependencies {
+    compileOnly "org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT"
+    compileOnly files("../server/plugins/FastAsyncWorldEdit-bukkit-1.13.100.jar"); // hard coded because this version of FAWE is "bleeding-edge"
+}
