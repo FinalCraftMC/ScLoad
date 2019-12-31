@@ -1,8 +1,8 @@
 name: ScLoad
 main: me.fromgate.scload.ScLoad
-version: 0.2
+version: 0.2.1a
 depend: [WorldEdit]
-author: [fromgate, Exemplive]
+author: [fromgate, Exemplive, EverNife]
 commands:
    scload:
       aliases: [scl]

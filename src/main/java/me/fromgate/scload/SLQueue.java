@@ -23,37 +23,30 @@
 
 package me.fromgate.scload;
 
-import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.blocks.Blocks;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.math.Vector3;
-import com.sk89q.worldedit.world.block.BaseBlock;
-import com.sk89q.worldedit.world.block.BlockState;
-import com.sk89q.worldedit.world.block.BlockType;
-import com.sk89q.worldedit.world.registry.BlockMaterial;
-import com.sk89q.worldedit.world.registry.PassthroughBlockMaterial;
-
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
+import com.sk89q.worldedit.extent.transform.BlockTransformExtent;
+import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
+import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.schematic.SchematicFormat;
+import com.sk89q.worldedit.session.ClipboardHolder;
+import com.sk89q.worldedit.util.io.Closer;
+import com.sk89q.worldedit.world.registry.WorldData;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
 @SuppressWarnings("all")
 public class SLQueue {
@@ -66,7 +59,7 @@ public class SLQueue {
 
     World world;
     BukkitWorld worldeditworld;
-    BlockVector3 pos;
+    Vector pos;
     BlockArrayClipboard bac;
 
 
@@ -82,7 +75,7 @@ public class SLQueue {
         return flag_loaded;
     }
 
-    SLQueue(World w, BlockVector3 v, String filename) throws FileNotFoundException {
+    SLQueue(World w, Vector v, String filename) throws FileNotFoundException {
         this.world = w;
         this.pos = v;
         bac = load(filename);
@@ -108,38 +101,41 @@ public class SLQueue {
 
     public BlockArrayClipboard load(String filename) {
         if (filename.isEmpty()) return null;
-        File f = null;
+        File schematicFile = null;
         // If the file does not exist in root schematics folder, check its subdirectories
         // By default, FAWE separates schematics per-UUID folder but this can be disabled through
         // configuration.
         for (File file : new File(plg().schem_dir).listFiles()) {
         	if (file.getName().startsWith(filename + ".")) {
-                f = file;
+                schematicFile = file;
                 break;
             }
         }
-        if (f == null) {
+        if (schematicFile == null) {
         	for (File file : new File(plg().schem_dir).listFiles()) {
             	if (!file.isDirectory())
             		continue;
                 for (File schematic : file.listFiles()) {
                     if (schematic.getName().startsWith(filename + ".")) {
-                        f = schematic;
+                        schematicFile = schematic;
                         break;
                     }
                 }
             }
         }
-        if (f == null || !f.exists()) return null;
-        ClipboardFormat sc = ClipboardFormats.findByFile(f);
-        if (sc == null) return null;
+        if (schematicFile == null || !schematicFile.exists()) return null;
+
         BlockArrayClipboard bac = null;
-        try {
-            bac = (BlockArrayClipboard) sc.getReader(new FileInputStream(f)).read();
-        } catch (Exception e) {
-            plg().u.log("Error loading file " + f.getAbsolutePath());
+        try(Closer closer = Closer.create()) {
+            FileInputStream fis = closer.register(new FileInputStream(schematicFile));
+            BufferedInputStream bis = closer.register(new BufferedInputStream(fis));
+            ClipboardReader reader = ClipboardFormat.SCHEMATIC.getReader(bis);
+            bac = (BlockArrayClipboard) reader.read(worldeditworld.getWorldData());
+        } catch (IOException e) {
+            plg().u.log("Error loading file " + schematicFile.getAbsolutePath());
             e.printStackTrace();
         }
+
         return bac;
     }
 
@@ -154,30 +150,29 @@ public class SLQueue {
     }
 
     public void fillEntities() {
-        BlockVector3 dim = bac.getDimensions();
+        Vector dim = bac.getDimensions();
         Location loc1 = new Location(world, pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
         Location loc2 = new Location(world, pos.getBlockX() + dim.getBlockX(), pos.getBlockY() + dim.getBlockY(), pos.getBlockZ() + dim.getBlockZ());
         entities = plg().u.getEntities(loc1, loc2);
     }
 
-    public void addDelayed(BlockVector3 pos2, BlockArrayClipboard bac) {
+    public void addDelayed(Vector pos2, BlockArrayClipboard bac) {
         queue = new ArrayList<List<VBlock>>();
         chunked = new HashMap<VChunk, List<VBlock>>();
         List<VBlock> first = new ArrayList<VBlock>();
         List<VBlock> last = new ArrayList<VBlock>();
         List<VBlock> fin = new ArrayList<VBlock>();
-        BlockVector3 dimensions = bac.getDimensions();
+        Vector dimensions = bac.getDimensions();
         for (int x = 0; x < dimensions.getBlockX(); x++)
             for (int y = 0; y < dimensions.getBlockY(); y++)
                 for (int z = 0; z < dimensions.getBlockZ(); z++) {
                     if (pos2.getBlockY() + y < 0) continue;
                     if (pos2.getBlockY() + y >= world.getMaxHeight()) continue;
-                    BlockVector3 altpos = BlockVector3.at(x, y, z).add(bac.getMinimumPoint());
-                    BlockState bb = bac.getBlock(altpos);
-                    CompoundTag nbt = bac.getFullBlock(altpos).getNbtData();
-                    BlockVector3 bv = pos2.add(x, y, z);
+
+                    BaseBlock bb = bac.getBlock(new Vector(x, y, z).add(bac.getMinimumPoint()));
+                    BlockVector bv = pos2.add(x, y, z).toBlockVector();
                     VChunk vch = new VChunk(bv);
-                    VBlock vb = new VBlock(world, bv, bb, nbt);
+                    VBlock vb = new VBlock(world, bv, bb);
                     if (!chunked.containsKey(vch)) chunked.put(vch, new ArrayList<VBlock>());
                     chunked.get(vch).add(vb);
                 }
@@ -186,8 +181,8 @@ public class SLQueue {
         for (VChunk vch : chunked.keySet()) {
             for (int i = 0; i < chunked.get(vch).size(); i++) {
                 VBlock vb = chunked.get(vch).get(i);
-                if (BlockPlacement.shouldPlaceFinal(vb.bblock.getBlockType())) fin.add(vb);
-                else if (BlockPlacement.shouldPlaceLast(vb.bblock.getBlockType())) last.add(vb);
+                if (BlockType.shouldPlaceFinal(vb.bblock.getType())) fin.add(vb);
+                else if (BlockType.shouldPlaceLast(vb.bblock.getType())) last.add(vb);
                 else first.add(vb);
             }
         }
@@ -265,12 +260,11 @@ public class SLQueue {
         if (blocks.isEmpty()) return;
         for (int i = 0; i < blocks.size(); i++) {
             Block b = world.getBlockAt(blocks.get(i).bvector.getBlockX(), blocks.get(i).bvector.getBlockY(), blocks.get(i).bvector.getBlockZ());
-            BlockType type = BukkitAdapter.adapt(b.getBlockData()).getBlockType();
-            BlockMaterial material = type.getMaterial();
-            if ((BlockPlacement.shouldPlaceFinal(type)) ||
-                    (BlockPlacement.shouldPlaceLast(type)) ||
-                    (material instanceof PassthroughBlockMaterial)) b.setBlockData(Material.AIR.createBlockData(), !plg().fastplace);
-            else if (material.hasContainer()) worldeditworld.clearContainerBlockContents(blocks.get(i).bvector);
+            int id = b.getTypeId();
+            if ((BlockType.shouldPlaceFinal(id)) ||
+                    (BlockType.shouldPlaceLast(id)) ||
+                    (BlockType.canPassThrough(id))) b.setTypeIdAndData(0, (byte) 0, (!plg().fastplace));
+            else if (BlockType.isContainerBlock(id)) worldeditworld.clearContainerBlockContents(blocks.get(i).bvector);
         }
         if (plg().fastplace) for (int i = 0; i < blocks.size(); i++) blocks.get(i).placeBlockFast();
         else for (int i = 0; i < blocks.size(); i++) blocks.get(i).placeBlock();

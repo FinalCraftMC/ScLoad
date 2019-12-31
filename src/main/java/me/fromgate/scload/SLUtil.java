@@ -23,8 +23,7 @@
 
 package me.fromgate.scload;
 
-import com.sk89q.worldedit.math.BlockVector3;
-
+import com.sk89q.worldedit.Vector;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -79,7 +78,7 @@ public class SLUtil extends FGUtilCore implements CommandExecutor, Listener {
             int x = Integer.parseInt(xs);
             int y = Integer.parseInt(ys);
             int z = Integer.parseInt(zs);
-            BlockVector3 v = BlockVector3.at(x, y, z);
+            Vector v = new Vector(x, y, z);
             QueueManager.addQueue(sender, w, v, fn);
             printMSG(sender, "msg_loadstarted", new Location(w, x, y, z), fn);
         } else return false;

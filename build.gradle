@@ -3,6 +3,14 @@ plugins {
     id 'eclipse'
 }
 
+sourceCompatibility = 1.8
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 repositories {
     mavenCentral()
     maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots" }
@@ -10,6 +18,6 @@ repositories {
 }
 
 dependencies {
-    compileOnly "org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT"
-    compileOnly files("../server/plugins/FastAsyncWorldEdit-bukkit-1.13.100.jar"); // hard coded because this version of FAWE is "bleeding-edge"
+    compileOnly 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
+    compileOnly fileTree(dir: 'libs', include: ['*.jar'])       //Current Folder Libs
 }

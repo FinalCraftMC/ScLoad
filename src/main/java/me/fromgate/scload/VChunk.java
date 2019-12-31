@@ -23,13 +23,13 @@
 
 package me.fromgate.scload;
 
-import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.BlockVector;
 
 public class VChunk {
     int x;
     int z;
 
-    public VChunk(BlockVector3 bv) {
+    public VChunk(BlockVector bv) {
         x = bv.getBlockX() >> 4;
         z = bv.getBlockZ() >> 4;
     }
