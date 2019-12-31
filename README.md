@@ -1,4 +1,4 @@
-# ScLoad for WorldEdit 7
+# ScLoad for WorldEdit 6.1
 
 **ScLoad** is a Spigot plugin enabling schematics to be placed programmatically
 with the Minecraft command line. It relies on WorldEdit for schematic reading and
@@ -10,10 +10,9 @@ without even deprecating the older functionality first. This causes previous
 versions of ScLoad or any other WorldEdit-reliant plugins to immediately break when
 run with WorldEdit 7.
 
-**ScLoad for WorldEdit 7** is a new version of ScLoad which utilizes the new
-WorldEdit 7 API, enabling it to work on modern versions of WorldEdit. It is also 
-compatible with Fast Async WorldEdit 1.13 (breaking), which is itself based on
-WorldEdit 7.
+**ScLoad for WorldEdit 6** is a new version of ScLoad which utilizes the new
+WorldEdit 6 API, enabling it to work on legacy versions of WorldEdit (Like the ones
+that work on Thermos/Crucible Servers).
 
 ## License
 
