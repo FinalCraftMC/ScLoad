@@ -1,14 +1,10 @@
-name: ScLoad
-main: me.fromgate.scload.ScLoad
+name: BetterScLoad
+main: br.com.finalcraft.betterscload.BetterScLoad
 version: 0.2.1a
 depend: [WorldEdit]
-author: [fromgate, Exemplive, EverNife]
+author: [EverNife]
 commands:
-   scload:
-      aliases: [scl]
-      description: ScLoad command
-      usage: |
-           /scload load <filename>
-           /scload load <filename> <world>
-           /scload reload
-           /scload cfg
+   betterscload:
+      description: BetterScLoad Main Command
+      usage: /<command>
+      aliases: [scload, bscl, scl]

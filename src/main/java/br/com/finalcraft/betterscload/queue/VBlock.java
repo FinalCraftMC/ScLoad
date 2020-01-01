@@ -1,28 +1,29 @@
 /*  
- *  ScLoad, Minecraft bukkit plugin
+ *  BetterScLoad, Minecraft bukkit plugin
  *  (c)2013-2017, fromgate, fromgate@gmail.com
  *  http://dev.bukkit.org/server-mods/schematic/
  *
- *  This file is part of ScLoad.
+ *  This file is part of BetterScLoad.
  *
- *  ScLoad is free software: you can redistribute it and/or modify
+ *  BetterScLoad is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  ScLoad is distributed in the hope that it will be useful,
+ *  BetterScLoad is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with ScLoad.  If not, see <http://www.gnorg/licenses/>.
+ *  along with BetterScLoad.  If not, see <http://www.gnorg/licenses/>.
  *
  */
 
 
-package me.fromgate.scload;
+package br.com.finalcraft.betterscload.queue;
 
+import br.com.finalcraft.betterscload.config.ConfigManager;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
@@ -42,8 +43,15 @@ public class VBlock {
         this.hash = calcHashCode();
     }
 
+    public void remapID(BaseBlock baseBlock){
+        if (ConfigManager.hasRemapMap()){
+            baseBlock.setId(ConfigManager.getRemmapedID(baseBlock.getId()));
+        }
+    }
+
     public void placeBlockFast() {
         try {
+            remapID(bblock);
             world.setBlock(bvector, bblock, false);
         } catch (WorldEditException e) {
             e.printStackTrace();
@@ -53,6 +61,7 @@ public class VBlock {
     public void placeBlock() {
 
         try {
+            remapID(bblock);
             world.setBlock(bvector, bblock, true);
         } catch (WorldEditException e) {
             e.printStackTrace();
