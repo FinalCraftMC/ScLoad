@@ -38,13 +38,6 @@ public class QueueManager {
 
     private static Map<String, SLQueue> qman = new HashMap<>();
 
-    public static boolean addQueue(Player player, String fileName) {
-        if (qman.containsKey(player.getName()) && qman.get(player.getName()).isActive()) return false;
-        return addQueue (player, player.getWorld(),
-                new Vector(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ()),
-                fileName);
-    }
-
     public static boolean addQueue(CommandSender sender, World world, Vector v, String fileName) {
         if (qman.containsKey(sender.getName()) && qman.get(sender.getName()).isActive()) return false;
         SLQueue slQueue = null;

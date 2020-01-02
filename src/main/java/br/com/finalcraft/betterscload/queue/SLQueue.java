@@ -288,8 +288,16 @@ public class SLQueue {
                     (BlockType.canPassThrough(id))) b.setTypeIdAndData(0, (byte) 0, (!ConfigManager.fastplace));
             else if (BlockType.isContainerBlock(id)) worldeditworld.clearContainerBlockContents(blocks.get(i).bvector);
         }
-        if (ConfigManager.fastplace) for (int i = 0; i < blocks.size(); i++) blocks.get(i).placeBlockFast();
-        else for (int i = 0; i < blocks.size(); i++) blocks.get(i).placeBlock();
+        if (ConfigManager.fastplace) {
+            for (int i = 0; i < blocks.size(); i++){
+                blocks.get(i).placeBlockFast();
+            }
+        }
+        else {
+            for (int i = 0; i < blocks.size(); i++){
+                blocks.get(i).placeBlock();
+            }
+        }
     }
 
     /** [NOTE FROM EXEMPLIVE]: I don't asynchronous chunk refresh is safe? **/

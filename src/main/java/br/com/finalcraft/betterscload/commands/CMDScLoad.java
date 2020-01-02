@@ -2,6 +2,7 @@ package br.com.finalcraft.betterscload.commands;
 
 import br.com.finalcraft.betterscload.BetterScLoad;
 import br.com.finalcraft.betterscload.PermissionNodes;
+import br.com.finalcraft.betterscload.config.data.BlockRemap;
 import br.com.finalcraft.betterscload.queue.QueueManager;
 import br.com.finalcraft.betterscload.config.ConfigManager;
 import br.com.finalcraft.evernifecore.FCBukkitUtil;
@@ -19,6 +20,7 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class CMDScLoad implements CommandExecutor {
@@ -41,6 +43,8 @@ public class CMDScLoad implements CommandExecutor {
                 return load(label,sender,argumentos);
             case "list":
                 return list(label,sender,argumentos);
+            case "setmappings":
+                return setmappings(label,sender,argumentos);
             case "reload":
                 return reload(label,sender,argumentos);
         }
@@ -55,6 +59,7 @@ public class CMDScLoad implements CommandExecutor {
     public boolean help(String label, CommandSender sender, MultiArgumentos argumentos){
         sender.sendMessage("§6§m---------------§6( §e§lBetterScLoad§r §6)§m---------------");
         new FancyText("§3§l ▶ §a/" + label + " load <SchematicName> [WorldName xCord yCord zCord]","§bCarrega uma schematic para a sua posição, ou a posição especificada!").setSuggestCommandAction("/" + label + " load").sendTo(sender);
+        new FancyText("§3§l ▶ §a/" + label + " setMappings <mappingName|null>","§bDefine o conjuntod e mappings para colar as Schematics!").setSuggestCommandAction("/" + label + " setMappings").sendTo(sender);
         new FancyText("§3§l ▶ §a/" + label + " list","§bLista todos as Schematics disponíveis!").setSuggestCommandAction("/" + label + " list").sendTo(sender);
         new FancyText("§3§l ▶ §a/" + label + " reload","§bRecarrega as configurações do plugin!").setSuggestCommandAction("/" + label + " reload").sendTo(sender);
         sender.sendMessage("§6§m-----------------------------------------------------");
@@ -129,6 +134,35 @@ public class CMDScLoad implements CommandExecutor {
                 sender.sendMessage("§3§l ▶ §a" + fileName);
             }
         }
+        return true;
+    }
+
+
+    // -----------------------------------------------------------------------------------------------------------------------------//
+    // Command SetMappings
+    // -----------------------------------------------------------------------------------------------------------------------------//
+    public boolean setmappings(String label, CommandSender sender, MultiArgumentos argumentos){
+
+        if (argumentos.get(1).isEmpty()){
+            new FancyText("§3§l ▶ §a/" + label + " setMappings <mappingName|null>","§bDefine o conjuntod e mappings para colar as Schematics!").setSuggestCommandAction("/" + label + " setMappings").sendTo(sender);
+            return true;
+        }
+
+        if (argumentos.get(1).equalsIgnoreCase("null")){
+            sender.sendMessage("§2§l ▶ §aMappings desativado!");
+            ConfigManager.selectedMap = null;
+            return true;
+        }
+
+        HashMap<String, BlockRemap> selectedMap = ConfigManager.remmaping2DMap.get(argumentos.get(1).toLowerCase());
+
+        if (selectedMap == null){
+            sender.sendMessage("§4§l ▶ §cNão existe nenhum mappings chamado: §e" + argumentos.get(1));
+            return true;
+        }
+
+        ConfigManager.selectedMap = selectedMap;
+        sender.sendMessage("§2§l ▶ §aMappings definido para: §e" + argumentos.get(1));
         return true;
     }
 

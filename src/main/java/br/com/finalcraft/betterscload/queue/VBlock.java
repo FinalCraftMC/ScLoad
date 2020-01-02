@@ -43,16 +43,13 @@ public class VBlock {
         this.hash = calcHashCode();
     }
 
-    public void remapID(BaseBlock baseBlock){
-        if (ConfigManager.hasRemapMap()){
-            baseBlock.setId(ConfigManager.getRemmapedID(baseBlock.getId()));
-        }
-    }
 
     public void placeBlockFast() {
         try {
-            remapID(bblock);
-            world.setBlock(bvector, bblock, false);
+            ConfigManager.applyRemap(bblock);
+            if (bblock.getType() != 0){
+                world.setBlock(bvector, bblock, false);
+            }
         } catch (WorldEditException e) {
             e.printStackTrace();
         }
@@ -61,7 +58,7 @@ public class VBlock {
     public void placeBlock() {
 
         try {
-            remapID(bblock);
+            ConfigManager.applyRemap(bblock);
             world.setBlock(bvector, bblock, true);
         } catch (WorldEditException e) {
             e.printStackTrace();
