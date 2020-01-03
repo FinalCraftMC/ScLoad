@@ -2,6 +2,8 @@ package br.com.finalcraft.betterscload.config.data;
 
 import com.sk89q.worldedit.blocks.BaseBlock;
 
+import java.util.regex.Pattern;
+
 public class BlockRemap {
 
     int itemIDOrigin;
@@ -11,7 +13,7 @@ public class BlockRemap {
     int itemMetavalueTarget;
 
     public BlockRemap(String aLine) throws Exception{
-        String[] splited = aLine.split(" - ");
+        String[] splited = aLine.replace(" ","").split(Pattern.quote("|"));
 
         if (splited[0].contains(":")){
             String[] secondSplit = splited[0].split(":");
@@ -27,7 +29,7 @@ public class BlockRemap {
             itemIDTarget = Integer.parseInt(secondSplit[0]);
             itemMetavalueTarget = Integer.parseInt(secondSplit[1]);
         }else {
-            itemIDTarget = Integer.parseInt(splited[0]);
+            itemIDTarget = Integer.parseInt(splited[1]);
             itemMetavalueTarget = -1;
         }
     }

@@ -33,6 +33,8 @@ import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
+import com.sk89q.worldedit.extent.clipboard.io.SchematicReader;
+import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.io.Closer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -71,14 +73,19 @@ public class SLQueue {
         return flag_loaded;
     }
 
-    SLQueue(World w, Vector v, String filename) throws FileNotFoundException {
-        this.world = w;
-        this.pos = v;
-        this.worldeditworld = new BukkitWorld(w);
+    SLQueue(World world, Vector vector, String filename) throws FileNotFoundException {
+        this.world = world;
+        this.worldeditworld = new BukkitWorld(world);
         bac = load(filename);
         if (bac == null) {
             throw new FileNotFoundException("Schematic file not found.");
         }
+        this.pos = calculatePosWithOffset(vector, bac);
+    }
+
+    public Vector calculatePosWithOffset(Vector origin, BlockArrayClipboard bac){
+        Vector offset = bac.getMinimumPoint().subtract(bac.getOrigin());
+        return origin.add(offset);
     }
 
     public boolean isActive() {
@@ -125,13 +132,12 @@ public class SLQueue {
         try(Closer closer = Closer.create()) {
             FileInputStream fis = closer.register(new FileInputStream(schematicFile));
             BufferedInputStream bis = closer.register(new BufferedInputStream(fis));
-            ClipboardReader reader = ClipboardFormat.SCHEMATIC.getReader(bis);
+            SchematicReader reader = (SchematicReader)ClipboardFormat.SCHEMATIC.getReader(bis);
             bac = (BlockArrayClipboard) reader.read(worldeditworld.getWorldData());
         } catch (IOException e) {
             plg().getLogger().warning("Error loading file " + schematicFile.getAbsolutePath());
             e.printStackTrace();
         }
-
         return bac;
     }
 
@@ -178,7 +184,7 @@ public class SLQueue {
         return entities;
     }
 
-    public void addDelayed(Vector pos2, BlockArrayClipboard bac) {
+    public void addDelayed(Vector origin, BlockArrayClipboard bac) {
         queue = new ArrayList<List<VBlock>>();
         chunked = new HashMap<VChunk, List<VBlock>>();
         List<VBlock> first = new ArrayList<VBlock>();
@@ -188,11 +194,11 @@ public class SLQueue {
         for (int x = 0; x < dimensions.getBlockX(); x++)
             for (int y = 0; y < dimensions.getBlockY(); y++)
                 for (int z = 0; z < dimensions.getBlockZ(); z++) {
-                    if (pos2.getBlockY() + y < 0) continue;
-                    if (pos2.getBlockY() + y >= world.getMaxHeight()) continue;
+                    if (origin.getBlockY() + y < 0) continue;
+                    if (origin.getBlockY() + y >= world.getMaxHeight()) continue;
 
                     BaseBlock bb = bac.getBlock(new Vector(x, y, z).add(bac.getMinimumPoint()));
-                    BlockVector bv = pos2.add(x, y, z).toBlockVector();
+                    BlockVector bv = origin.add(x, y, z).toBlockVector();
                     VChunk vch = new VChunk(bv);
                     VBlock vb = new VBlock(world, bv, bb);
                     if (!chunked.containsKey(vch)) chunked.put(vch, new ArrayList<VBlock>());

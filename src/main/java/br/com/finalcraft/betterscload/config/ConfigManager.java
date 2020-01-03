@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 public class ConfigManager {
 
@@ -35,7 +36,7 @@ public class ConfigManager {
         schematicDirName    = mainConfig.getOrSetDefaultValue("Settings.schematicDirName", getSchematicDirectory());
 
         if (mainConfig.getKeys("Remmaping").isEmpty()){
-            mainConfig.setDefaultValue("Remmaping.example", Arrays.asList("1:1 - 35:1","1:2 - 35:2","6 - 36","7 - 37"));
+            mainConfig.setDefaultValue("Remmaping.example", Arrays.asList("1:1 | 1:2"));
         }
 
         remmaping2DMap.clear();
@@ -45,11 +46,18 @@ public class ConfigManager {
                 try{
                     BlockRemap blockRemap = new BlockRemap(remapValue);
                     remmapingMap.put(blockRemap.getOriginIdentifier(),blockRemap);
-                }catch (Exception e){
+                }catch (Throwable e){
                     e.printStackTrace();
                 }
             }
             remmaping2DMap.put(remapName.toLowerCase(),remmapingMap);
+        }
+
+        for (Map.Entry<String, HashMap<String, BlockRemap>> entry : remmaping2DMap.entrySet()) {
+            if(entry.getKey().equalsIgnoreCase("default")){
+                selectedMap = entry.getValue();
+                break;
+            }
         }
 
         mainConfig.save();
@@ -57,18 +65,16 @@ public class ConfigManager {
 
     public static HashMap<String, BlockRemap> selectedMap;
 
-    public static boolean applyRemap(BaseBlock baseBlock){
-        if (selectedMap !=null){
+    public static void applyRemap(BaseBlock baseBlock){
+        if (selectedMap != null){
             BlockRemap blockRemap = selectedMap.get(baseBlock.getType() + ":" + baseBlock.getData());
             if (blockRemap == null){
                 blockRemap = selectedMap.get(baseBlock.getType() + ":-1");
             }
             if (blockRemap != null){
                 blockRemap.applyRemap(baseBlock);
-                return true;
             }
         }
-        return false;
     }
 
     private static String getSchematicDirectory() {
